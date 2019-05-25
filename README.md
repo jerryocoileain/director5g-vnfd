@@ -8,6 +8,7 @@ The build script creates all the following VNFD and NS files:
 3. hydra_client_rx2_vnfd.tar.gz
 4. hydra_client_rx2_vnfd.tar.gz
 5. hydra_basic_nsd.tar.gz
+6. ndn_cdn_server_vnf.tar.gz
 
 File 5 is a basic experiment consisting of a 2-EVI Base Station (hydra_client_2tx_rx and hydra_server) and 2 clients (rx1 and rx2, for the 1st and 2nd EVI, respectively).
 
