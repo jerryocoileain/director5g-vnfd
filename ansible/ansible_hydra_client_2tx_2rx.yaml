@@ -1,0 +1,74 @@
+- hosts: transmitters
+  remote_user: ubuntu
+  tasks:
+# All updates disabled by default. Uncomment all the lines below to have update version of dependencies and HyDRA
+#   - name: Install dependencies
+#     apt:
+#       name: "{{ packages }}"
+#     vars:
+#       packages:
+#         - libzmq3-dev
+#         - libfftw3-dev
+#         - libopencv-dev
+#         - gnuradio
+#         - gnuradio-dev
+#     become: yes
+
+#   - name: Get source for GR-Hydra
+#     git:
+#       repo: "https://github.com/maiconkist/gr-hydra.git"
+#       dest: /home/ubuntu/gr-hydra
+#       version: bleeding
+#       update: true
+#       force: yes
+#
+#   - name: Make HyDRA Directory
+#     file:
+#       path: /home/ubuntu/gr-hydra/build
+#       state: directory
+#   - name: CMake HyDRA
+#     command: cmake ../
+#     args:
+#       chdir: /home/ubuntu/gr-hydra/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/build
+#       target: install
+#     become: yes
+#
+#   - name: Make GRC-HyDRA Directory
+#     file:
+#       path: /home/ubuntu/gr-hydra/grc_blocks/build
+#       state: directory
+#   - name: CMake HyDRA
+#     command: cmake ../
+#     args:
+#       chdir: /home/ubuntu/gr-hydra/grc_blocks/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/grc_blocks/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/grc_blocks/build
+#       target: install
+#     become: yes
+
+    - name: "Create tap0 interface"
+      shell: |
+        sudo ip tuntap add mode tap dev tap0
+        sudo ip addr add 1.1.1.1/24 dev tap0
+        sudo ip link set dev tap0 up
+
+    - name: "Create tap1 interface"
+      shell: |
+        sudo ip tuntap add mode tap dev tap1
+        sudo ip addr add 2.2.2.1/24 dev tap1
+        sudo ip link set dev tap1 up
+
+    - name: chmod  /home/ubuntu/gr-hydra/grc_blocks/app/ansible_hydra_gr_client_2tx_2rx.py
+      file:
+        path: /home/ubuntu/gr-hydra/grc_blocks/app/ansible_hydra_gr_client_2tx_2rx.py
+        state: file
+        mode: a+x
+
+    - name: Start ansible_hydra_gr_client_2tx_2rx.py script. Log to /tmp/
+      shell: "(nohup python /home/ubuntu/gr-hydra/grc_blocks/app/ansible_hydra_gr_client_2tx_2rx.py --ansibleIP {{ hostvars[inventory_hostname]['ansible_ens4']['ipv4']['address'] }} </dev/null > /tmp/ansible_hydra_gr_client_2tx_2rx.log 2>&1 &)"

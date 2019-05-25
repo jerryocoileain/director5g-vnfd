@@ -1,0 +1,12 @@
+- hosts: servers, transmitters, rx1, rx2
+  tasks:
+    - name: Remove log files
+      shell: "rm /tmp/ansible_*"
+
+    - name: Get running processes
+      shell: "ps -ef | grep -v grep | grep -w python | awk '{print $2}'"
+      register: running_processes
+
+    - name: Kill running processes
+      shell: "kill {{ item }}"
+      with_items: "{{ running_processes.stdout_lines }}"

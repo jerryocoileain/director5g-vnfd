@@ -1,0 +1,48 @@
+#!/bin/bash
+
+rm *.tar.gz
+rm -rf tmp_vnfd
+
+build_vnfd () {
+# Generate compiled charm
+#pushd $1/charms/ansible-charm
+#rm -rf builds/ deps/
+#charm build
+#popd
+
+# Copy compiled charm to vnfd/charms
+#cp -R $1/charms/ansible-charm/builds/ansible-charm $1/vnfd/charms/
+
+# generate tar.gz
+mkdir tmp_$1
+cp -r $1/vnfd/* tmp_$1
+cd tmp_$1
+find * -type f -print | while read line; do md5sum $line >> checksums.txt; done
+cd ..
+tar -czvf $1_vnf.tar.gz tmp_$1
+rm -rf tmp_$1
+}
+
+echo "----- Build the Server NFD -------"
+build_vnfd ndn_hydra_server
+
+echo "----- Build the client NFD -------"
+build_vnfd ndn_hydra_client_2tx_2rx
+
+echo "----- Build the NDN-CDN Server NFD -------"
+build_vnfd ndn_cdn_server
+
+echo "----- Build the RX1 NFD -------"
+build_vnfd ndn_hydra_rx1
+
+echo "----- Build the RX2 NFD -------"
+build_vnfd ndn_hydra_rx2
+
+echo "----- Building the BASIC NS -------"
+mkdir tmp_ns
+cp -r ndn_hydra_basic_ns/* tmp_ns
+cd tmp_ns
+find * -type f -print | while read line; do md5sum $line >> checksums.txt; done
+cd ..
+tar -czvf ndn_hydra_basic_ns.tar.gz tmp_ns
+rm -rf tmp_ns

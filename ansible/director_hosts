@@ -1,0 +1,14 @@
+[servers]
+director-server
+
+[transmitters]
+director-client tap0=1.1.1.1 tap1=2.2.2.1
+
+[rx1]
+director-rx1 tap0=1.1.1.2
+
+[rx2]
+director-rx2 tap0=2.2.2.2
+
+[all:vars]
+ansible_ssh_common_args='-F /Users/mkist/.ssh/config'

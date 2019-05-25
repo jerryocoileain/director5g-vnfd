@@ -1,0 +1,113 @@
+vnfd-catalog:
+  vnfd:
+  - id: ndn_hydra_server
+    name: ndn_hydra_server
+    short-name: ndn_hydra_server
+    description: HyDRA-AAS VNF Server
+
+    vendor: 5GINFIRE
+    version: '1.0'
+
+    logo: 5GinFIRE.png
+
+    # Management interface
+    mgmt-interface:
+      cp: ens1 # management interface using OSM of 5GInFire
+
+    connection-point:
+      - name: ens1
+        type: VPORT
+      - name: ens4
+        type: VPORT
+      - name: ens5
+        type: VPORT
+      - name: ens7
+        type: VPORT
+
+    # Atleast one VDU need to be specified
+    vdu:
+    - id: ndn_hydra_server-VM
+      name: ndn_hydra_server-VM
+      description: HYDRA-AAS Server VM.
+
+      image: director5g
+      count: 1
+#     guest-epa:
+#       cpu-pinning-policy: DEDICATED
+#       cpu-thread-pinning-policy: PREFER
+#       mempage-size: SMALL
+#       numa-node-policy:
+#         mem-policy: STRICT
+#         node:
+#         - id: '1'
+#         node-cnt: '1'
+      vm-flavor:
+        memory-mb: 4096
+        storage-gb: 20
+        vcpu-count: 1
+      interface:
+      - external-connection-point-ref: ens1
+        name: ens1
+        position: '1'
+        type: EXTERNAL
+        virtual-interface:
+          bandwidth: '0'
+          type: VIRTIO
+          vpci: 0000:00:0a.0
+      - external-connection-point-ref: ens4
+        name: ens4
+        position: '1'
+        type: EXTERNAL
+        virtual-interface:
+          bandwidth: '0'
+          type: VIRTIO
+          vpci: 0000:00:0a.0
+      - external-connection-point-ref: ens5
+        name: ens5
+        position: '1'
+        type: EXTERNAL
+        virtual-interface:
+          bandwidth: '0'
+          type: VIRTIO
+          vpci: 0000:00:0a.0
+      - external-connection-point-ref: ens7
+        name: ens7
+        position: '2'
+        type: EXTERNAL
+        virtual-interface:
+          type: SR-IOV
+
+    vnf-configuration:
+      juju:
+        charm: ansible-charm-v2
+      service-primitive:
+      - name: config
+        parameter:
+        - name: ssh-hostname
+          data-type: STRING
+          mandatory: false
+          default-value: <rw_mgmt_ip>
+        - name: ssh-username
+          data-type: STRING
+          mandatory: false
+          default-value: ubuntu
+        - name: ssh-password
+          data-type: STRING
+          mandatory: false
+          default-value: 5ginfire
+        - name: ssh-private-key
+          data-type: STRING
+          mandatory: false
+      - name: ansible-playbook
+      initial-config-primitive:
+      - name: config
+        parameter:
+        - name: ssh-hostname
+          value: <rw_mgmt_ip>
+        - name: ssh-username
+          value: ubuntu
+        - name: ssh-password
+          value: 5ginfire
+        seq: '1'
+      - name: ansible-playbook
+        seq: '2'

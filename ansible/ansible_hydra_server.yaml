@@ -1,0 +1,72 @@
+- hosts: servers
+  remote_user: ubuntu
+  tasks:
+# All updates disabled by default. Uncomment all the lines below to have update version of dependencies and HyDRA
+#   - name: Install dependencies
+#     apt:
+#       name: "{{ packages }}"
+#     vars:
+#       packages:
+#         - libzmq3-dev
+#         - libfftw3-dev
+#         - libopencv-dev
+#         - gnuradio
+#         - gnuradio-dev
+#     become: yes
+
+#   - name: Get source for HyDRA
+#     git:
+#       repo: 'https://github.com/maiconkist/gr-hydra.git'
+#       dest: ~/gr-hydra
+#       version: bleeding
+#       update: true
+#       force: yes
+#
+#   - name: Make HyDRA Directory
+#     file:
+#       path: /home/ubuntu/gr-hydra/build
+#       state: directory
+#   - name: CMake HyDRA
+#     command: cmake ../
+#     args:
+#       chdir: /home/ubuntu/gr-hydra/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/build
+#       target: install
+#     become: yes
+#
+#   - name: Make GRC-HyDRA Directory
+#     file:
+#       path: /home/ubuntu/gr-hydra/grc_blocks/build
+#       state: directory
+#   - name: CMake HyDRA
+#     command: cmake ../
+#     args:
+#       chdir: /home/ubuntu/gr-hydra/grc_blocks/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/grc_blocks/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/grc_blocks/build
+#       target: install
+#     become: yes
+
+#   - name: Replace hydraServerIP by the correct address
+#     replace:
+#       dest: /home/ubuntu/gr-hydra/grc_blocks/app/ansible_hydra_gr_server.py
+#       regexp: 'ansibleIP'
+#       replace: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+#
+
+
+#   - debug:
+#       msg: "{{ hostvars[inventory_hostname]['ansible_ens4']['ipv4']['address'] }}"
+
+    - name: chmod  /home/ubuntu/gr-hydra/grc_blocks/app/ansible_hydra_gr_server.py
+      file:
+        path: /home/ubuntu/gr-hydra/grc_blocks/app/ansible_hydra_gr_server.py
+        state: file
+        mode: a+x
+    - name: "Start ansible_hydra_gr_server.py script. Log to /tmp/"
+      shell: "(nohup python /home/ubuntu/gr-hydra/grc_blocks/app/ansible_hydra_gr_server.py --ansibleIPPort {{ hostvars[inventory_hostname]['ansible_ens4']['ipv4']['address'] }}:5000  </dev/null > /tmp/ansible_hydra_gr_server.log 2>&1 &)"

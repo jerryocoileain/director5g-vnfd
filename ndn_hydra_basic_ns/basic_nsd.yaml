@@ -1,0 +1,91 @@
+nsd-catalog:
+  nsd:
+  - id: ndn_hydra_basic_nsd
+    name: ndn_hydra_basic_nsd
+    short-name: ndn_hydra_basic_nsd
+    description: Basic HyDRA-AAS Example
+    vendor: 5GINFIRE
+    version: '1.0'
+
+    logo: 5GinFIRE.png
+
+    # Specify the VNFDs that are part of this NSD
+    constituent-vnfd:
+    - member-vnf-index: 1
+      vnfd-id-ref: ndn_hydra_rx1
+      start-by-default: true
+    - member-vnf-index: 2
+      vnfd-id-ref: ndn_hydra_rx2
+      start-by-default: true
+    - member-vnf-index: 3
+      vnfd-id-ref: ndn_hydra_server
+      start-by-default: true
+    - member-vnf-index: 4
+      vnfd-id-ref: ndn_hydra_client_2tx_2rx
+      start-by-default: true
+    - member-vnf-index: 5
+      vnfd-id-ref: ndn_cdn_server
+      start-by-default: true
+
+    vld:
+    - id: hydra_nsd_vld4
+      name: hydra_nsd_vld4
+      short-name: hydra_nsd_vld4
+      type: ELAN
+      vim-network-name: iris2        # Connect to the iris2 (internal # testbed) network
+      vnfd-connection-point-ref:
+      - member-vnf-index-ref: 1
+        vnfd-connection-point-ref: ens4
+      - member-vnf-index-ref: 2
+        vnfd-connection-point-ref: ens4
+      - member-vnf-index-ref: 3
+        vnfd-connection-point-ref: ens4
+      - member-vnf-index-ref: 4
+        vnfd-connection-point-ref: ens4
+      - member-vnf-index-ref: 5
+        vnfd-connection-point-ref: ens4
+    - id: hydra_nsd_vld1
+      mgmt-network: 'true'
+      name: hydra_nsd_vld1
+      short-name: hydra_nsd_vld1
+      type: ELAN
+      vim-network-name: provider    # Connect to the provider network
+      vnfd-connection-point-ref:
+      - member-vnf-index-ref: 1
+        vnfd-connection-point-ref: ens1
+      - member-vnf-index-ref: 2
+        vnfd-connection-point-ref: ens1
+      - member-vnf-index-ref: 3
+        vnfd-connection-point-ref: ens1
+      - member-vnf-index-ref: 4
+        vnfd-connection-point-ref: ens1
+      - member-vnf-index-ref: 5
+        vnfd-connection-point-ref: ens1
+    - id: hydra_nsd_vld3
+      name: hydra_nsd_vld3
+      short-name: hydra_nsd_vld3
+      type: ELAN
+      vim-network-name: provider2      # Connect to provider2 network
+      vnfd-connection-point-ref:
+      - member-vnf-index-ref: 1
+        vnfd-connection-point-ref: ens5
+      - member-vnf-index-ref: 2
+        vnfd-connection-point-ref: ens5
+      - member-vnf-index-ref: 3
+        vnfd-connection-point-ref: ens5
+      - member-vnf-index-ref: 4
+        vnfd-connection-point-ref: ens5
+      - member-vnf-index-ref: 5
+        vnfd-connection-point-ref: ens5
+    - id: hydra_nsd_vld2
+      name: hydra_nsd_vld2
+      short-name: hydra_nsd_vld2
+      type: ELAN
+      vim-network-name: sriovnet      # Connect to the sriovnet network
+      vnfd-connection-point-ref:
+      - member-vnf-index-ref: 1
+        vnfd-connection-point-ref: ens7
+      - member-vnf-index-ref: 2
+        vnfd-connection-point-ref: ens7
+      - member-vnf-index-ref: 3
+        vnfd-connection-point-ref: ens7

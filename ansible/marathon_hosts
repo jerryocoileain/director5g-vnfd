@@ -1,0 +1,14 @@
+[servers]
+marathon-server
+
+[transmitters]
+marathon-client tap0=3.3.3.1 tap1=4.4.4.1
+
+[rx1]
+marathon-rx1 tap0=3.3.3.2
+
+[rx2]
+marathon-rx2 tap0=4.4.4.2
+
+[all:vars]
+ansible_ssh_common_args='-F /Users/mkist/.ssh/config'

@@ -1,0 +1,128 @@
+---
+- hosts: targets
+  remote_user: ubuntu
+  tasks:
+# All updates disabled by default. Uncomment all the lines below to have update version of dependencies and HyDRA
+#   - name: Install dependencies
+#     apt:
+#       name: "{{ packages }}"
+#     vars:
+#       packages:
+#         - libzmq3-dev
+#         - libfftw3-dev
+#         - libopencv-dev
+#         - gnuradio
+#         - gnuradio-dev
+#     become: yes
+
+#   - name: Get source for GR-Hydra
+#     git:
+#       repo: "https://github.com/maiconkist/gr-hydra.git"
+#       dest: /home/ubuntu/gr-hydra
+#       version: bleeding
+#       update: true
+#       force: yes
+#
+#   - name: Make HyDRA Directory
+#     file:
+#       path: /home/ubuntu/gr-hydra/build
+#       state: directory
+#   - name: CMake HyDRA
+#     command: cmake ../
+#     args:
+#       chdir: /home/ubuntu/gr-hydra/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/build
+#       target: install
+#     become: yes
+#
+#   - name: Make GRC-HyDRA Directory
+#     file:
+#       path: /home/ubuntu/gr-hydra/grc_blocks/build
+#       state: directory
+#   - name: CMake HyDRA
+#     command: cmake ../
+#     args:
+#       chdir: /home/ubuntu/gr-hydra/grc_blocks/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/grc_blocks/build
+#   - make:
+#       chdir: /home/ubuntu/gr-hydra/grc_blocks/build
+#       target: install
+#     become: yes
+
+    - name: "Create tap0 and tap1 interfaces"
+      shell: |
+        ip tuntap add mode tap dev tap0
+        ip tuntap add mode tap dev tap1
+        ip addr add 1.1.1.1/24 dev tap0
+        ip addr add 2.2.2.1/24 dev tap1
+        ifconfig tap0 mtu 100
+        ifconfig tap1 mtu 100
+        ip link set dev tap0 up
+        ip link set dev tap1 up
+      become: yes
+
+#   - name: Replacing hydraClientIP
+#     replace:
+#       dest: /home/ubuntu/gr-hydra/grc_blocks/app/ansible_hydra_gr_client_2tx_2rx.py
+#       regexp: "ansibleIP"
+#       replace: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+
+    - name: chmod  /home/ubuntu/gr-hydra/grc_blocks/app/ansible_hydra_gr_client_2tx_2rx.py
+      file:
+        path: /home/ubuntu/gr-hydra/grc_blocks/app/ansible_hydra_gr_client_2tx_2rx.py
+        state: file
+        mode: a+x
+
+    - name: Start ansible_hydra_gr_client_2tx_2rx.py script. Log to /tmp/
+      shell: "(nohup python /home/ubuntu/gr-hydra/grc_blocks/app/ansible_hydra_gr_client_2tx_2rx.py --ansibleIP {{ hostvars[inventory_hostname]['ansible_ens4']['ipv4']['address'] }}  </dev/null > /tmp/ansible_hydra_gr_client_2tx_2rx.log 2>&1 &)"
+
+#    - name: Configure srsLTE EPC
+#      replace:
+#        path: /home/ubuntu/.config/srslte/epc.conf
+#        regexp: '127.0.1.100'
+#        replace: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+#        backup: yes
+   
+#    - name: Start srsEPC
+#      shell: "(nohup sudo srsepc </dev/null > /tmp/srsepc.log 2>&1 &)"
+
+#    - name: Add routing for srs_spgw_sgi gateway for LTE network
+#      shell: "(sudo iptables --table nat --append POSTROUTING --out-interface ens3 -j MASQUERADE)"
+
+#    - name: Add packet forwarding(enable packet forwarding by kernel net.ipv4.ip_forward=1) for srs_spgw_sgi gateway for LTE network
+#      shell: "(sudo iptables --append FORWARD --in-interface srs_spgw_sgi -j ACCEPT)"
+
+    - name: Scan ports on network to find NFD process running
+      shell: "(sudo nmap --open -sS -p 6363 192.168.5.0/24 | grep 'Nmap scan report' | sed 's/ /,/g'| awk -F, '{print $5}' >ips.out)"
+
+    - name: Start NFD
+      shell: "(nohup sudo /usr/local/bin/nfd-start > nfd.log 2>&1 &)"
+
+    - name: Add face and route to NFD for NDN-CDN server
+      shell: "(/home/ubuntu/ndn-add-route-loop.sh)"
+
+    - name: Create a face to wireless (OFDM) interface UE slice1
+      shell: "(sudo nfdc face create udp://1.1.1.2)"
+
+    - name: Create a route to UE slice1
+      shell: "(sudo nfdc route add / udp://1.1.1.2)"
+
+    - name: Create a face to wireless (OFDM) interface UE slice2
+      shell: "(sudo nfdc face create udp://2.2.2.2)"
+
+    - name: Create a route to UE slice2
+      shell: "(sudo nfdc route add / udp://2.2.2.2)"
+
+#    - name: Create a face to wireless (OFDM) interface on LTE network
+#      shell: "(sudo nfdc face create udp://172.16.0.1)"
+
+#    - name: Create a route to UE slice2
+#      shell: "(sudo nfdc route add / udp://172.16.0.1)"
+
+#    - name: Start DIRECTOR 5G D-Controller element
+#      shell: "(nohup /usr/bin/python /home/ubuntu/dcontroller-repo/dcontroller.py 127.0.0.1 {{ hostvars[inventory_hostname]['ansible_ens4']['ipv4']['address'] }} </dev/null > /tmp/d-controller.log 2>&1 &)"
+
